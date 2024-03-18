@@ -8,51 +8,151 @@
     body {
         font-family: Arial, sans-serif;
         text-align: center;
+        cursor: none; /* Hide the default cursor */
     }
     .mine {
-        display: inline-block;
+        position: absolute;
         width: 100px;
         height: 100px;
         background-color: #ccc;
         border: 2px solid #000;
-        margin: 10px;
-        cursor: pointer;
+    }
+    #pickaxe {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background-color: #333;
+        border: 2px solid #000;
+        border-radius: 50%;
+        pointer-events: none; /* Prevent the pickaxe from being clickable */
+    }
+    #production {
+        font-weight: bold;
     }
 </style>
 </head>
-<body>
+<body onmousemove="movePickaxe(event)">
     <h1>Mining Game</h1>
-    <p>Click on the mine to collect resources:</p>
+    <p>Hover over the mines to collect resources:</p>
     <div id="mines">
-        <div class="mine" onclick="mineClick(1)"></div>
-        <div class="mine" onclick="mineClick(2)"></div>
-        <div class="mine" onclick="mineClick(3)"></div>
+        <div class="mine" style="top: 100px; left: 100px;" onclick="mineClick('coal')"></div>
+        <div class="mine" style="top: 200px; left: 200px;" onclick="mineClick('iron')"></div>
+        <div class="mine" style="top: 300px; left: 300px;" onclick="mineClick('gold')"></div>
     </div>
-    <p>Resources: <span id="resources">0</span></p>
+    <p>Resources:</p>
+    <ul id="resources">
+        <li id="coal">Coal: <span>0</span></li>
+        <li id="iron">Iron: <span>0</span></li>
+        <li id="gold">Gold: <span>0</span></li>
+    </ul>
     <p>Pickaxe Level: <span id="pickaxeLevel">1</span></p>
-    <button onclick="upgradePickaxe()">Upgrade Pickaxe (Cost: 10 resources)</button>
+    <button onclick="upgradePickaxe()">Upgrade Pickaxe</button>
+    <p>Upgrade Coal per second (Cost: 100 coal): <button onclick="upgradeCoalPerSecond()">Upgrade</button></p>
+    <p>Upgrade Iron per second (Cost: 100 iron): <button onclick="upgradeIronPerSecond()">Upgrade</button></p>
+    <p>Upgrade Gold per second (Cost: 100 gold): <button onclick="upgradeGoldPerSecond()">Upgrade</button></p>
+
+    <div id="pickaxe"></div>
+
+    <p id="production">Coal per second: <span id="coalPerSecond">0</span>, Iron per second: <span id="ironPerSecond">0</span>, Gold per second: <span id="goldPerSecond">0</span></p>
 
     <script>
-        let resources = 0;
+        let resources = {
+            coal: 0,
+            iron: 0,
+            gold: 0
+        };
         let pickaxeLevel = 1;
+        let coalPerSecond = 0;
+        let ironPerSecond = 0;
+        let goldPerSecond = 0;
 
-        function mineClick(mineId) {
-            const resourceGain = Math.ceil(Math.random() * pickaxeLevel * 5); // Random resource gain based on pickaxe level
-            resources += resourceGain;
-            document.getElementById('resources').textContent = resources;
-            alert(`You mined ${resourceGain} resources from mine ${mineId}!`);
+        function movePickaxe(event) {
+            const pickaxe = document.getElementById('pickaxe');
+            pickaxe.style.top = `${event.clientY}px`;
+            pickaxe.style.left = `${event.clientX}px`;
+        }
+
+        function mineClick(resourceType) {
+            const resourceGain = Math.ceil(Math.random() * pickaxeLevel * 10); // Random resource gain based on pickaxe level
+            resources[resourceType] += resourceGain;
+            document.getElementById(resourceType).querySelector('span').textContent = resources[resourceType];
         }
 
         function upgradePickaxe() {
-            const upgradeCost = 10; // Cost to upgrade pickaxe
-            if (resources >= upgradeCost) {
-                resources -= upgradeCost;
-                pickaxeLevel++;
-                document.getElementById('resources').textContent = resources;
-                document.getElementById('pickaxeLevel').textContent = pickaxeLevel;
-                alert(`Pickaxe upgraded to level ${pickaxeLevel}!`);
+            const upgradeCosts = {
+                2: { coal: 50 },
+                3: { iron: 500 }
+            };
+
+            const requiredResource = upgradeCosts[pickaxeLevel];
+            if (requiredResource) {
+                let canUpgrade = true;
+                for (const resource in requiredResource) {
+                    if (resources[resource] < requiredResource[resource]) {
+                        canUpgrade = false;
+                        break;
+                    }
+                }
+                if (canUpgrade) {
+                    for (const resource in requiredResource) {
+                        resources[resource] -= requiredResource[resource];
+                        document.getElementById(resource).querySelector('span').textContent = resources[resource];
+                    }
+                    pickaxeLevel++;
+                    document.getElementById('pickaxeLevel').textContent = pickaxeLevel;
+                } else {
+                    alert("Not enough resources to upgrade pickaxe!");
+                }
             } else {
-                alert("Not enough resources to upgrade pickaxe!");
+                alert("Max level reached!");
+            }
+        }
+
+        function upgradeCoalPerSecond() {
+            const upgradeCost = 100;
+            if (resources.coal >= upgradeCost) {
+                resources.coal -= upgradeCost;
+                coalPerSecond++;
+                document.getElementById('coal').querySelector('span').textContent = resources.coal;
+                document.getElementById('coalPerSecond').textContent = coalPerSecond;
+                setInterval(() => {
+                    resources.coal += coalPerSecond;
+                    document.getElementById('coal').querySelector('span').textContent = resources.coal;
+                }, 1000);
+            } else {
+                alert("Not enough coal to upgrade coal per second!");
+            }
+        }
+
+        function upgradeIronPerSecond() {
+            const upgradeCost = 100;
+            if (resources.iron >= upgradeCost) {
+                resources.iron -= upgradeCost;
+                ironPerSecond++;
+                document.getElementById('iron').querySelector('span').textContent = resources.iron;
+                document.getElementById('ironPerSecond').textContent = ironPerSecond;
+                setInterval(() => {
+                    resources.iron += ironPerSecond;
+                    document.getElementById('iron').querySelector('span').textContent = resources.iron;
+                }, 1000);
+            } else {
+                alert("Not enough iron to upgrade iron per second!");
+            }
+        }
+
+        function upgradeGoldPerSecond() {
+            const upgradeCost = 100;
+            if (resources.gold >= upgradeCost) {
+                resources.gold -= upgradeCost;
+                goldPerSecond++;
+                document.getElementById('gold').querySelector('span').textContent = resources.gold;
+                document.getElementById('goldPerSecond').textContent = goldPerSecond;
+                setInterval(() => {
+                    resources.gold += goldPerSecond;
+                    document.getElementById('gold').querySelector('span').textContent = resources.gold;
+                }, 1000);
+            } else {
+                alert("Not enough gold to upgrade gold per second!");
             }
         }
     </script>
