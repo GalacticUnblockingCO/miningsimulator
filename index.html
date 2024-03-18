@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mining Game</title>
+<style>
+    body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+    }
+    .mine {
+        display: inline-block;
+        width: 100px;
+        height: 100px;
+        background-color: #ccc;
+        border: 2px solid #000;
+        margin: 10px;
+        cursor: pointer;
+    }
+</style>
+</head>
+<body>
+    <h1>Mining Game</h1>
+    <p>Click on the mine to collect resources:</p>
+    <div id="mines">
+        <div class="mine" onclick="mineClick(1)"></div>
+        <div class="mine" onclick="mineClick(2)"></div>
+        <div class="mine" onclick="mineClick(3)"></div>
+    </div>
+    <p>Resources: <span id="resources">0</span></p>
+    <p>Pickaxe Level: <span id="pickaxeLevel">1</span></p>
+    <button onclick="upgradePickaxe()">Upgrade Pickaxe (Cost: 10 resources)</button>
+
+    <script>
+        let resources = 0;
+        let pickaxeLevel = 1;
+
+        function mineClick(mineId) {
+            const resourceGain = Math.ceil(Math.random() * pickaxeLevel * 5); // Random resource gain based on pickaxe level
+            resources += resourceGain;
+            document.getElementById('resources').textContent = resources;
+            alert(`You mined ${resourceGain} resources from mine ${mineId}!`);
+        }
+
+        function upgradePickaxe() {
+            const upgradeCost = 10; // Cost to upgrade pickaxe
+            if (resources >= upgradeCost) {
+                resources -= upgradeCost;
+                pickaxeLevel++;
+                document.getElementById('resources').textContent = resources;
+                document.getElementById('pickaxeLevel').textContent = pickaxeLevel;
+                alert(`Pickaxe upgraded to level ${pickaxeLevel}!`);
+            } else {
+                alert("Not enough resources to upgrade pickaxe!");
+            }
+        }
+    </script>
+</body>
+</html>
